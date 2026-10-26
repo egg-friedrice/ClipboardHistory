@@ -1,0 +1,25 @@
+ClipboardHistory.xcodeproj/project.pbxproj
+  s_0f2eed82ceb531::t_1ab1b3cbf73d0f 363,392
+README.md
+  s_0f2eed82ceb531::t_1ab1b3cbf73d0f 18-19
+ClipboardHistory/Services/ClipboardStore.swift
+  s_0f2eed82ceb531::t_1ab1b3cbf73d0f 84
+ClipboardHistory/Views/AboutView.swift
+  s_0f2eed82ceb531::t_1ab1b3cbf73d0f 23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "5a98699d4031c6891efeefeb5808c344fdd1ac22",
+  "prompts": {},
+  "sessions": {
+    "s_0f2eed82ceb531": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17740-fc4b-7da0-9093-c12fe6dbfe94",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "zouheng199 <932919553@qq.com>"
+    }
+  }
+}
