@@ -20,7 +20,7 @@ struct AboutView: View {
 
     /// Bundle ID。
     private var bundleID: String {
-        Bundle.main.bundleIdentifier ?? "com.zouheng.ClipboardHistory"
+        Bundle.main.bundleIdentifier ?? "com.clipboard.ClipboardHistory"
     }
 
     var body: some View {

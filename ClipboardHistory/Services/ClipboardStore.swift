@@ -81,7 +81,7 @@ final class ClipboardStore: ObservableObject {
         self.defaults = defaults
         self.historyURL = historyURL ?? FileManager.default.urls(
             for: .applicationSupportDirectory, in: .userDomainMask
-        )[0].appendingPathComponent("com.zouheng.ClipboardHistory", isDirectory: true)
+        )[0].appendingPathComponent("com.clipboard.ClipboardHistory", isDirectory: true)
             .appendingPathComponent("history.plist")
         self.monitor = ClipboardMonitor()
         let savedMax = defaults.object(forKey: Self.maxItemsKey) as? Int
