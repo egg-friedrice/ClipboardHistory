@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+.AppleDouble
+._*
+
+# Xcode local settings
+xcuserdata/
+*.xcuserstate
+
+# Build output and packaging
+/build/
+/dist/
+/DerivedData/
+*.app/
+*.dSYM/
+*.xcarchive/
+*.dmg
+*.pkg
+*.xcresult/
+*.xcactivitylog
+
+# Local temporary files and secrets
+/tmp/
+*.log
+.env
+.env.*
+!.env.example
+*.p12
+*.mobileprovision
+*.provisionprofile
