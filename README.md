@@ -15,8 +15,7 @@ macOS 菜单栏剪贴板历史工具，支持文字、图片、搜索和快捷�
 - 保存历史默认关闭，可在设置中开启。开启后文字和图片保存在本机，启动时恢复，自动过期不生效。
 - 关闭保存时删除磁盘副本，当前内存记录按自动过期设置清理。自动过期可关闭或设置为 1–5 小时。
 - 降低上限、删除和清空记录会同步更新内存及磁盘历史。
-- 保存位置：`~/Library/Application Support/com.clipboard.ClipboardHistory/history.plist`。其中 `~` 是当前登录用户的主目录，与开发者的电脑用户名无关。
-- 应用标识：`com.clipboard.ClipboardHistory`。从旧标识版本更换到本版本时，偏好设置会重新初始化，旧目录中的历史不会自动迁移；辅助功能权限和开机自启动可能需要重新设置。
+- 保存位置：`~/Library/Application Support/com.clipboard.ClipboardHistory/history.plist`。
 
 ## 构建
 
