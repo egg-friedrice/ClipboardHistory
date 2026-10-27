@@ -11,6 +11,7 @@ struct ClipboardHistoryView: View {
     @ObservedObject var store: ClipboardStore
     @ObservedObject var accessibility: AccessibilityService
     @Binding var isPresented: Bool
+    var onPreview: (ClipboardItem) -> Void
 
     /// 用于从右键菜单打开偏好设置 / 关于窗口（contract S06）。
     @Environment(\.openWindow) private var openWindow
@@ -113,7 +114,8 @@ struct ClipboardHistoryView: View {
                             item: item,
                             highlightKeyword: keyword,
                             onTap: { handleTap(item) },
-                            onDelete: { store.remove(item.id) }
+                            onDelete: { store.remove(item.id) },
+                            onPreview: { onPreview(item) }
                         )
                         .listRowInsets(EdgeInsets(top: 2, leading: 0, bottom: 2, trailing: 0))
                         .listRowSeparator(.hidden)

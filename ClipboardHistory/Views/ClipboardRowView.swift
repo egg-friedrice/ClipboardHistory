@@ -20,6 +20,7 @@ struct ClipboardRowView: View {
     var highlightKeyword: String = ""
     var onTap: (() -> Void)? = nil
     var onDelete: (() -> Void)? = nil
+    var onPreview: (() -> Void)? = nil
 
     @State private var isHovered: Bool = false
 
@@ -30,14 +31,27 @@ struct ClipboardRowView: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            leadingView
-            VStack(alignment: .leading, spacing: 2) {
-                primaryText
+            HStack(spacing: 8) {
+                leadingView
+                VStack(alignment: .leading, spacing: 2) {
+                    primaryText
+                }
+                Spacer(minLength: 4)
+                Text(relativeTimeString(from: item.timestamp))
+                    .foregroundStyle(isHovered ? hoverTimeColor : Color.secondary)
+                    .font(.caption) // ~11px
             }
-            Spacer(minLength: 4)
-            Text(relativeTimeString(from: item.timestamp))
-                .foregroundStyle(isHovered ? hoverTimeColor : Color.secondary)
-                .font(.caption) // ~11px
+            .contentShape(Rectangle())
+            .onTapGesture { onTap?() }
+
+            if item.type == .image {
+                Button("预览") { onPreview?() }
+                    .buttonStyle(.borderless)
+                    .font(.caption)
+                    .foregroundStyle(isHovered ? Color.white : Color.accentColor)
+                    .fixedSize()
+                    .help("按原尺寸预览图片")
+            }
         }
         .padding(.vertical, 2)
         .padding(.horizontal, 6)
@@ -46,9 +60,6 @@ struct ClipboardRowView: View {
         .contentShape(Rectangle())
         .onHover { hovering in
             isHovered = hovering
-        }
-        .onTapGesture {
-            onTap?()
         }
         .contextMenu {
             Button("删除", role: .destructive) {

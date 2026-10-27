@@ -17,6 +17,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, Obs
     let accessibility = AccessibilityService()
     let scanner = ExpirationScanner()
     let rightClickMenu = RightClickMenuController()
+    let imagePreviews = ImagePreviewController()
 
     private(set) var statusItem: NSStatusItem?
     private let historyPopover = NSPopover()
@@ -208,7 +209,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, Obs
             isPresented: Binding(
                 get: { [weak self] in self?.historyPopover.isShown ?? false },
                 set: { [weak self] shown in if !shown { self?.closeHistoryPanel() } }
-            )
+            ),
+            onPreview: { [weak self] item in
+                self?.closeHistoryPanel()
+                self?.imagePreviews.show(item)
+            }
         ))
         historyPopover.appearance = NSApp.effectiveAppearance
         historyPopover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)

@@ -6,6 +6,8 @@
 
 `Views/ClipboardHistoryView.swift` 与 `ClipboardRowView.swift` 展示文字、图片、搜索、删除和清空功能；`SettingsView.swift` 管理偏好。历史面板和右键菜单采用应用的系统外观，支持浅色和深色模式。
 
+`Support/ImagePreviewController.swift` 由 AppDelegate 持有，使用图片数据的 SHA-256 管理独立预览窗口；相同内容复用窗口，不同图片可同时显示，关闭时释放对应窗口。图片按原始像素尺寸显示在双向滚动视图中。列表的预览按钮与复制区域分开处理点击，打开预览前关闭历史面板并清除待粘贴状态。
+
 ## 记录与保存
 
 `Services/ClipboardMonitor.swift` 每 0.3 秒检查剪贴板 changeCount，读取文字或图片，过滤连续重复内容。写回时同步 changeCount，避免将选中的历史再次入库。
