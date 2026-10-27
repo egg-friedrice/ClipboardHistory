@@ -1,0 +1,33 @@
+CHANGELOG.md
+  s_47aaf4ea3cd8c2::t_319311c695da81 1-17
+README.md
+  s_47aaf4ea3cd8c2::t_5f9f7f73b0e064 11
+CODE_OVERVIEW.md
+  s_47aaf4ea3cd8c2::t_5f9f7f73b0e064 9-10
+ClipboardHistory/ClipboardHistoryApp.swift
+  s_47aaf4ea3cd8c2::t_b5a5f91c0767b0 20,212-216
+ClipboardHistory.xcodeproj/project.pbxproj
+  s_47aaf4ea3cd8c2::t_f54d68348ccd64 28,54,130,221,353,366,382,395
+ClipboardHistory/Views/ClipboardHistoryView.swift
+  s_47aaf4ea3cd8c2::t_b5a5f91c0767b0 14,117-118
+ClipboardHistory/Views/ClipboardRowView.swift
+  s_47aaf4ea3cd8c2::t_b5a5f91c0767b0 23,34-53
+ClipboardHistory/Support/ImagePreviewController.swift
+  s_47aaf4ea3cd8c2::t_b5a5f91c0767b0 1-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "c1805bf6a25115942e3cfc404a92273a69a118fa",
+  "prompts": {},
+  "sessions": {
+    "s_47aaf4ea3cd8c2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17c29-f295-7851-99af-d0fa6adf8b7c",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "zouheng199 <932919553@qq.com>"
+    }
+  }
+}
