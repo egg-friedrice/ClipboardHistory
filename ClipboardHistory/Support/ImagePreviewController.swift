@@ -4,6 +4,7 @@ import CryptoKit
 /// 生命周期独立于历史面板；同一份图片数据只持有一个窗口。
 final class ImagePreviewController: NSObject, NSWindowDelegate {
     private var windows: [SHA256.Digest: NSWindow] = [:]
+    private var escapeMonitor: Any?
     private var cascadePoint = NSPoint.zero
 
     func show(_ item: ClipboardItem) {
@@ -63,6 +64,7 @@ final class ImagePreviewController: NSObject, NSWindowDelegate {
         if cascadePoint == .zero { cascadePoint = NSPoint(x: window.frame.minX, y: window.frame.maxY) }
         cascadePoint = window.cascadeTopLeft(from: cascadePoint)
         windows[key] = window
+        installEscapeMonitorIfNeeded()
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
         // AppKit 的文档坐标原点在左下角，初次打开从图片左上角开始看。
@@ -70,10 +72,38 @@ final class ImagePreviewController: NSObject, NSWindowDelegate {
         scrollView.reflectScrolledClipView(scrollView.contentView)
     }
 
+    private func installEscapeMonitorIfNeeded() {
+        guard escapeMonitor == nil else { return }
+        escapeMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self, event.keyCode == 53, NSApp.modalWindow == nil,
+                  let window = event.window,
+                  self.windows.values.contains(where: { $0 === window }) else { return event }
+            self.closeAll()
+            return nil
+        }
+    }
+
+    func closeAll() {
+        // close 会同步触发 windowWillClose 并修改字典，先创建快照。
+        for window in Array(windows.values) {
+            window.close()
+        }
+    }
+
+    deinit {
+        if let escapeMonitor { NSEvent.removeMonitor(escapeMonitor) }
+    }
+
     func windowWillClose(_ notification: Notification) {
         guard let window = notification.object as? NSWindow,
               let key = windows.first(where: { $0.value === window })?.key else { return }
         windows.removeValue(forKey: key)
-        if windows.isEmpty { cascadePoint = .zero }
+        if windows.isEmpty {
+            cascadePoint = .zero
+            if let escapeMonitor {
+                NSEvent.removeMonitor(escapeMonitor)
+                self.escapeMonitor = nil
+            }
+        }
     }
 }

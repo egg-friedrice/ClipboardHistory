@@ -14,20 +14,21 @@ import SwiftUI
 /// 交互（contract S07）：
 /// - `onTap`：点击整行触发，由父视图实现写回 + 关闭面板。
 /// - `onDelete`：右键菜单 .destructive "删除"。
-/// - hover 时行背景 `#0a84ff`、文字 white、时间色 rgba(255,255,255,0.85)（contract S07 视觉规范）。
+/// - 键盘预选时蓝底白字，鼠标 hover 使用浅色背景，避免与预选混淆。
 struct ClipboardRowView: View {
     let item: ClipboardItem
     var highlightKeyword: String = ""
+    var isSelected: Bool = false
     var onTap: (() -> Void)? = nil
     var onDelete: (() -> Void)? = nil
     var onPreview: (() -> Void)? = nil
 
     @State private var isHovered: Bool = false
 
-    /// contract S07：hover 背景 #0a84ff（Light/Dark 一致）。
-    private let hoverBg = Color.systemBlue
-    /// contract S07：hover 时间色 rgba(255,255,255,0.85)。
-    private let hoverTimeColor = Color.white.opacity(0.85)
+    /// 预选背景 #0a84ff（Light/Dark 一致）。
+    private let selectionBg = Color.systemBlue
+    /// 预选时间色 rgba(255,255,255,0.85)。
+    private let selectionTimeColor = Color.white.opacity(0.85)
 
     var body: some View {
         HStack(spacing: 8) {
@@ -38,7 +39,7 @@ struct ClipboardRowView: View {
                 }
                 Spacer(minLength: 4)
                 Text(relativeTimeString(from: item.timestamp))
-                    .foregroundStyle(isHovered ? hoverTimeColor : Color.secondary)
+                    .foregroundStyle(isSelected ? selectionTimeColor : Color.secondary)
                     .font(.caption) // ~11px
             }
             .contentShape(Rectangle())
@@ -48,7 +49,7 @@ struct ClipboardRowView: View {
                 Button("预览") { onPreview?() }
                     .buttonStyle(.borderless)
                     .font(.caption)
-                    .foregroundStyle(isHovered ? Color.white : Color.accentColor)
+                    .foregroundStyle(isSelected ? Color.white : Color.accentColor)
                     .fixedSize()
                     .help("按原尺寸预览图片")
             }
@@ -56,11 +57,12 @@ struct ClipboardRowView: View {
         .padding(.vertical, 2)
         .padding(.horizontal, 6)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(isHovered ? hoverBg : Color.clear)
+        .background(isSelected ? selectionBg : (isHovered ? Color.primary.opacity(0.08) : Color.clear))
         .contentShape(Rectangle())
         .onHover { hovering in
             isHovered = hovering
         }
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
         .contextMenu {
             Button("删除", role: .destructive) {
                 onDelete?()
@@ -73,7 +75,7 @@ struct ClipboardRowView: View {
         switch item.type {
         case .text:
             Image(systemName: "doc.text")
-                .foregroundStyle(isHovered ? Color.white : Color.secondary)
+                .foregroundStyle(isSelected ? Color.white : Color.secondary)
                 .frame(width: 20)
         case .image:
             if let data = item.imageData, let nsImage = NSImage(data: data) {
@@ -84,7 +86,7 @@ struct ClipboardRowView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 4))
             } else {
                 Image(systemName: "photo")
-                    .foregroundStyle(isHovered ? Color.white : Color.secondary)
+                    .foregroundStyle(isSelected ? Color.white : Color.secondary)
                     .frame(width: 32, height: 32)
             }
         }
@@ -99,13 +101,13 @@ struct ClipboardRowView: View {
             Text(imageLabelText)
                 .lineLimit(1)
                 .truncationMode(.tail)
-                .foregroundStyle(isHovered ? Color.white : Color.primary)
+                .foregroundStyle(isSelected ? Color.white : Color.primary)
         }
     }
 
     /// 文本条目主文案。当 highlightKeyword 非空时，把 displayText 中
     /// localizedCaseInsensitiveContains 匹配的子段用 `.red` 染色（contract S02 高亮色 #d70015）。
-    /// hover 时整行反白，高亮段保持 .red（与 contract S07 hover 时文字 white 不冲突，匹配段仍红）。
+    /// 预选时整行反白，搜索匹配段仍保持 .red。
     @ViewBuilder
     private var highlightedText: some View {
         let text = item.displayText
@@ -114,24 +116,24 @@ struct ClipboardRowView: View {
             Text(text)
                 .lineLimit(1)
                 .truncationMode(.tail)
-                .foregroundStyle(isHovered ? Color.white : Color.primary)
+                .foregroundStyle(isSelected ? Color.white : Color.primary)
         } else if let ranges = caseInsensitiveRanges(of: trimmed, in: text), !ranges.isEmpty {
-            Text(attributedSegments(from: text, ranges: ranges, hovered: isHovered))
+            Text(attributedSegments(from: text, ranges: ranges, selected: isSelected))
                 .lineLimit(1)
                 .truncationMode(.tail)
         } else {
             Text(text)
                 .lineLimit(1)
                 .truncationMode(.tail)
-                .foregroundStyle(isHovered ? Color.white : Color.primary)
+                .foregroundStyle(isSelected ? Color.white : Color.primary)
         }
     }
 
-    /// 把 text 按 sorted ranges 切分，匹配段用 .red，其余段用 hover ? white : primary。
-    private func attributedSegments(from text: String, ranges: [Range<String.Index>], hovered: Bool) -> AttributedString {
+    /// 把 text 按 sorted ranges 切分，匹配段用 .red，其余段用 selected ? white : primary。
+    private func attributedSegments(from text: String, ranges: [Range<String.Index>], selected: Bool) -> AttributedString {
         var result = AttributedString()
         var cursor = text.startIndex
-        let baseColor: Color = hovered ? .white : .primary
+        let baseColor: Color = selected ? .white : .primary
         for r in ranges {
             if cursor < r.lowerBound {
                 var seg = AttributedString(String(text[cursor..<r.lowerBound]))

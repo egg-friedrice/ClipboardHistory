@@ -11,13 +11,15 @@ struct ClipboardHistoryView: View {
     @ObservedObject var store: ClipboardStore
     @ObservedObject var accessibility: AccessibilityService
     @Binding var isPresented: Bool
+    var isHistoryWindow: (NSWindow?) -> Bool
     var onPreview: (ClipboardItem) -> Void
 
     /// 用于从右键菜单打开偏好设置 / 关于窗口（contract S06）。
     @Environment(\.openWindow) private var openWindow
 
     @State private var keyword: String = ""
-    @State private var escMonitor: Any?
+    @State private var keyboardMonitor: Any?
+    @State private var selectedItemID: UUID?
     @FocusState private var searchFieldFocused: Bool
 
     /// 是否处于搜索态（keyword 去空格后非空）。
@@ -108,22 +110,29 @@ struct ClipboardHistoryView: View {
                     .font(.system(size: 13))
                 Spacer()
             } else {
-                List {
-                    ForEach(displayedItems) { item in
-                        ClipboardRowView(
-                            item: item,
-                            highlightKeyword: keyword,
-                            onTap: { handleTap(item) },
-                            onDelete: { store.remove(item.id) },
-                            onPreview: { onPreview(item) }
-                        )
-                        .listRowInsets(EdgeInsets(top: 2, leading: 0, bottom: 2, trailing: 0))
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
+                ScrollViewReader { proxy in
+                    List {
+                        ForEach(displayedItems) { item in
+                            ClipboardRowView(
+                                item: item,
+                                highlightKeyword: keyword,
+                                isSelected: selectedItemID == item.id,
+                                onTap: { handleTap(item) },
+                                onDelete: { store.remove(item.id) },
+                                onPreview: { onPreview(item) }
+                            )
+                            .id(item.id)
+                            .listRowInsets(EdgeInsets(top: 2, leading: 0, bottom: 2, trailing: 0))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                        }
+                    }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .onChange(of: selectedItemID) { _, id in
+                        if let id { proxy.scrollTo(id) }
                     }
                 }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
             }
 
             Divider()
@@ -154,15 +163,45 @@ struct ClipboardHistoryView: View {
             DispatchQueue.main.async {
                 searchFieldFocused = true
             }
-            escMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-                if event.keyCode == 53 { handleEscape(); return nil }
-                return event
+            selectedItemID = nil
+            keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+                guard isPresented, isHistoryWindow(event.window), NSApp.modalWindow == nil else { return event }
+                // 输入法组词时，上下键、回车和 ESC 由输入法处理。
+                if let editor = event.window?.firstResponder as? NSTextView, editor.hasMarkedText() {
+                    return event
+                }
+                guard event.modifierFlags.intersection([.command, .control, .option, .shift]).isEmpty else {
+                    return event
+                }
+                switch event.keyCode {
+                case 53:
+                    handleEscape()
+                case 125:
+                    moveSelection(by: 1)
+                case 126:
+                    moveSelection(by: -1)
+                case 36, 76:
+                    if let item = displayedItems.first(where: { $0.id == selectedItemID }) {
+                        handleTap(item)
+                    }
+                default:
+                    return event
+                }
+                return nil
             }
         }
         .onDisappear {
-            if let monitor = escMonitor {
+            if let monitor = keyboardMonitor {
                 NSEvent.removeMonitor(monitor)
-                escMonitor = nil
+                keyboardMonitor = nil
+            }
+        }
+        .onChange(of: keyword) { _, _ in
+            selectedItemID = nil
+        }
+        .onChange(of: displayedItems.map(\.id)) { _, ids in
+            if let selectedItemID, !ids.contains(selectedItemID) {
+                self.selectedItemID = nil
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .openPreferencesFromMenu)) { _ in
@@ -173,6 +212,17 @@ struct ClipboardHistoryView: View {
         }
         // 注：右键菜单的 onPreferences/onAbout 现在由 App 层直接打开窗口，
         // 不再依赖通知。此处保留作为左键面板内可能的未来扩展入口。
+    }
+
+    /// 初次向下选第一项、向上选最后一项；到达边界后停留在当前项。
+    private func moveSelection(by offset: Int) {
+        let items = displayedItems
+        guard !items.isEmpty else { selectedItemID = nil; return }
+        if let index = items.firstIndex(where: { $0.id == selectedItemID }) {
+            selectedItemID = items[min(max(index + offset, 0), items.count - 1)].id
+        } else {
+            selectedItemID = (offset > 0 ? items.first : items.last)?.id
+        }
     }
 
     /// 写回历史记录，关闭面板，再恢复原应用并粘贴。

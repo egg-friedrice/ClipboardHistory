@@ -210,6 +210,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, Obs
                 get: { [weak self] in self?.historyPopover.isShown ?? false },
                 set: { [weak self] shown in if !shown { self?.closeHistoryPanel() } }
             ),
+            isHistoryWindow: { [weak self] window in
+                guard let window, let self else { return false }
+                return window === self.historyPopover.contentViewController?.view.window
+            },
             onPreview: { [weak self] item in
                 self?.closeHistoryPanel()
                 self?.imagePreviews.show(item)
