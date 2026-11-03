@@ -17,6 +17,13 @@ struct ClipboardHistoryView: View {
     /// 用于从右键菜单打开偏好设置 / 关于窗口（contract S06）。
     @Environment(\.openWindow) private var openWindow
 
+    private enum TypeFilter: String, CaseIterable {
+        case all = "全部"
+        case image = "图片"
+        case text = "文字"
+    }
+
+    @State private var typeFilter: TypeFilter = .all
     @State private var keyword: String = ""
     @State private var keyboardMonitor: Any?
     @State private var selectedItemID: UUID?
@@ -24,7 +31,7 @@ struct ClipboardHistoryView: View {
 
     /// 是否处于搜索态（keyword 去空格后非空）。
     private var isSearching: Bool {
-        !keyword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        typeFilter != .image && !keyword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     /// 底栏文案（contract S01/S02/S15）。
@@ -44,9 +51,14 @@ struct ClipboardHistoryView: View {
         return "共 \(count) 条 · 自动过期 \(hours)h"
     }
 
-    /// 当前列表数据源：keyword 为空 → 全量；否则 → 仅匹配文本（图片条目一律隐藏，contract S02）。
+    /// 图片模式仅按类型筛选；全部和文字模式支持关键词搜索。
     private var displayedItems: [ClipboardItem] {
-        isSearching ? store.filtered(by: keyword) : store.items
+        let items = isSearching ? store.filtered(by: keyword) : store.items
+        switch typeFilter {
+        case .all: return items
+        case .image: return items.filter { $0.type == .image }
+        case .text: return items.filter { $0.type == .text }
+        }
     }
 
     var body: some View {
@@ -74,12 +86,13 @@ struct ClipboardHistoryView: View {
             HStack(spacing: 6) {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.secondary)
-                TextField("搜索...", text: $keyword)
+                TextField(typeFilter == .image ? "图片筛选" : "搜索...", text: $keyword)
+                    .disabled(typeFilter == .image)
                     .textFieldStyle(.plain)
                     .font(.system(size: 12))
                     .focused($searchFieldFocused)
                     .onSubmit { }
-                if !keyword.isEmpty {
+                if !keyword.isEmpty && typeFilter != .image {
                     Button {
                         keyword = ""
                         searchFieldFocused = true
@@ -90,6 +103,15 @@ struct ClipboardHistoryView: View {
                     }
                     .buttonStyle(.plain)
                 }
+                Picker("记录类型", selection: $typeFilter) {
+                    ForEach(TypeFilter.allCases, id: \.self) { filter in
+                        Text(filter.rawValue).tag(filter)
+                    }
+                }
+                .labelsHidden()
+                .pickerStyle(.menu)
+                .fixedSize()
+                .help("按全部、图片或文字筛选")
             }
             .padding(8)
             .background(
@@ -105,7 +127,7 @@ struct ClipboardHistoryView: View {
             // 中间列表 / 空状态 / 搜索无匹配。
             if displayedItems.isEmpty {
                 Spacer()
-                Text(isSearching ? "未匹配的剪贴板记录" : "暂无剪贴板历史")
+                Text(isSearching ? "未匹配的剪贴板记录" : (typeFilter == .all ? "暂无剪贴板历史" : "暂无\(typeFilter.rawValue)记录"))
                     .foregroundStyle(.secondary)
                     .font(.system(size: 13))
                 Spacer()
@@ -195,6 +217,10 @@ struct ClipboardHistoryView: View {
                 NSEvent.removeMonitor(monitor)
                 keyboardMonitor = nil
             }
+        }
+        .onChange(of: typeFilter) { _, filter in
+            selectedItemID = nil
+            searchFieldFocused = filter != .image
         }
         .onChange(of: keyword) { _, _ in
             selectedItemID = nil

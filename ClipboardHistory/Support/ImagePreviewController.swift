@@ -34,15 +34,10 @@ final class ImagePreviewController: NSObject, NSWindowDelegate {
 
         let imageView = NSImageView(frame: NSRect(origin: .zero, size: size))
         imageView.image = image
-        imageView.imageScaling = .scaleNone
-        imageView.imageAlignment = .alignTopLeft
-        imageView.setAccessibilityLabel("原尺寸图片预览")
-
-        let scrollView = NSScrollView()
-        scrollView.hasHorizontalScroller = true
-        scrollView.hasVerticalScroller = true
-        scrollView.autohidesScrollers = true
-        scrollView.documentView = imageView
+        imageView.imageScaling = .scaleProportionallyUpOrDown
+        imageView.imageAlignment = .alignCenter
+        imageView.autoresizingMask = [.width, .height]
+        imageView.setAccessibilityLabel("等比缩放图片预览")
 
         let visibleFrame = (NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1024, height: 768))
         let contentSize = NSSize(
@@ -58,7 +53,8 @@ final class ImagePreviewController: NSObject, NSWindowDelegate {
         window.isReleasedWhenClosed = false
         window.isRestorable = false
         window.tabbingMode = .disallowed
-        window.contentView = scrollView
+        imageView.frame = NSRect(origin: .zero, size: contentSize)
+        window.contentView = imageView
         window.delegate = self
         window.center()
         if cascadePoint == .zero { cascadePoint = NSPoint(x: window.frame.minX, y: window.frame.maxY) }
@@ -67,9 +63,7 @@ final class ImagePreviewController: NSObject, NSWindowDelegate {
         installEscapeMonitorIfNeeded()
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
-        // AppKit 的文档坐标原点在左下角，初次打开从图片左上角开始看。
-        scrollView.contentView.scroll(to: NSPoint(x: 0, y: max(0, size.height - scrollView.contentSize.height)))
-        scrollView.reflectScrolledClipView(scrollView.contentView)
+
     }
 
     private func installEscapeMonitorIfNeeded() {

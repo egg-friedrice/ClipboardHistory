@@ -51,7 +51,7 @@ struct ClipboardRowView: View {
                     .font(.caption)
                     .foregroundStyle(isSelected ? Color.white : Color.accentColor)
                     .fixedSize()
-                    .help("按原尺寸预览图片")
+                    .help("预览图片，随窗口等比缩放")
             }
         }
         .padding(.vertical, 2)
