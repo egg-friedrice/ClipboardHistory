@@ -1,0 +1,29 @@
+CHANGELOG.md
+  s_3d290a8f38513f::t_af95dea1684ec5 3-18
+ClipboardHistory.xcodeproj/project.pbxproj
+  s_3d290a8f38513f::t_c14f38d5327937 353,366,382,395
+ClipboardHistory/Support/ImagePreviewController.swift
+  s_3d290a8f38513f::t_bf18e2e75e4798 37-40,56-57,66
+ClipboardHistory/Views/ClipboardHistoryView.swift
+  s_3d290a8f38513f::t_36761fef84f0ed 20-26,34,54,56-61,89-90,95,106-114,130,221-224
+ClipboardHistory/Views/ClipboardRowView.swift
+  s_3d290a8f38513f::t_bc4d4f69f06ff4 54
+README.md
+  s_3d290a8f38513f::t_fe1bcb0412b117 12-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "908b26b17570b56ac37abf1798487d0374e98fc1",
+  "prompts": {},
+  "sessions": {
+    "s_3d290a8f38513f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17ff1-e0ce-7843-9e12-03282c382396",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "zouheng199 <932919553@qq.com>"
+    }
+  }
+}
