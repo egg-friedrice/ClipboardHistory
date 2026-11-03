@@ -25,15 +25,15 @@ final class RightClickMenuController {
 
     }
 
-    /// 弹出右键菜单。
-    func showMenu(relativeTo button: NSStatusBarButton?) {
+    /// 交给状态栏原生菜单布局，避免普通弹出菜单在屏幕顶部裁切。
+    func showMenu(relativeTo statusItem: NSStatusItem?) {
+        guard let statusItem, let button = statusItem.button else { return }
         accessibility?.refresh()
         let menu = buildMenu()
-        if let button {
-            menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.minY), in: button)
-        } else {
-            menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
-        }
+        statusItem.menu = menu
+        defer { statusItem.menu = nil }
+        // 菜单跟踪结束后恢复自定义点击动作，左键仍打开历史面板。
+        button.performClick(nil)
     }
 
     /// 构建 NSMenu（contract S06 顺序严格）。

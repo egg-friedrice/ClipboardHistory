@@ -28,7 +28,7 @@ macOS 菜单栏剪贴板历史工具，支持文字、图片、搜索和快捷�
 1. 打开根目录下的 `ClipboardHistory.xcodeproj`。
 2. 选择 `ClipboardHistory` scheme 和本机 Mac，配置本地签名后运行。
 
-也可在仓库根目录执行本地无签名构建：
+仅用于开发验证的无签名构建（不要用它替换已授权的正式版本）：
 
 ```sh
 xcodebuild -project ClipboardHistory.xcodeproj \
@@ -45,3 +45,20 @@ xcodebuild -project ClipboardHistory.xcodeproj \
 - `Design/`：应用图标原图及设计说明。
 - `CODE_OVERVIEW.md`：代码结构说明。
 - `PRD.md`：功能需求说明。
+
+## 覆盖升级与辅助功能权限
+
+macOS 根据代码签名身份识别应用；保持 Bundle ID 不变并不足以让无签名或 ad-hoc 构建继承权限。发布版本应始终使用同一团队的 Developer ID Application 签名，保持 `com.clipboard.ClipboardHistory` 和签名的 designated requirement 稳定，不要在开发签名与发布签名之间切换。
+
+安装好证书和私钥后，执行：
+
+```sh
+SIGNING_IDENTITY='Developer ID Application: 你的名称 (TEAMID)' \
+DEVELOPMENT_TEAM='TEAMID' bash Scripts/build-release.sh
+```
+
+脚本在缺少签名配置时直接失败，不会生成无签名发布包。输出位于 `build/release/Build/Products/Release/ClipboardHistory.app`。对外分发还应完成 Apple 公证。
+
+退出旧版后，将新版覆盖到同一个 `/Applications/ClipboardHistory.app`，再启动。从旧的无签名或不同签名版本首次迁移时，可能仍需重新授权一次；后续保持签名身份的覆盖升级才具备保留授权的条件。应用不能自行授予或迁移系统辅助功能权限。
+
+验证时，先给一个稳定签名版本授权，再构建代码有变化的同签名版本并覆盖安装；确认设置显示已授权，且选择历史记录能自动粘贴。右键菜单应贴在状态栏图标下方，第一项与退出项均完整显示；关闭菜单后左键仍应打开历史列表。也需在多显示器及自动隐藏菜单栏时检查布局。

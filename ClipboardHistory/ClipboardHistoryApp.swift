@@ -184,7 +184,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, Obs
             closeHistoryPanel()
             accessibility.refresh()
             NSApp.activate(ignoringOtherApps: true)
-            rightClickMenu.showMenu(relativeTo: statusItem?.button)
+            rightClickMenu.showMenu(relativeTo: statusItem)
         } else {
             toggleMenuBarExtraPanel()
         }
