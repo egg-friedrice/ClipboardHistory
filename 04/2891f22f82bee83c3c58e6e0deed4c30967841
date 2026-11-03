@@ -1,0 +1,27 @@
+ClipboardHistory/ClipboardHistoryApp.swift
+  s_cf29e768f59906::t_7542048ea8a8fb 187
+ClipboardHistory/Support/RightClickMenuController.swift
+  s_cf29e768f59906::t_6814dad116b493 28-30,33-36
+README.md
+  s_cf29e768f59906::t_4064a1962eab59 31,48-64
+Scripts/build-release.sh
+  s_cf29e768f59906::t_58a96bd43ed959 1-19
+ClipboardHistory.xcodeproj/project.pbxproj
+  s_cf29e768f59906::t_bb961c2d8fc8dd 353,366,382,395
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "042891f22f82bee83c3c58e6e0deed4c30967841",
+  "prompts": {},
+  "sessions": {
+    "s_cf29e768f59906": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a19f52-ca05-7a11-8b9c-4daef2054d8d",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "zouheng199 <932919553@qq.com>"
+    }
+  }
+}
